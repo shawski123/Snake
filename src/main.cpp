@@ -155,7 +155,7 @@ int main()
             std::cout << "Collision - segments: " << character.size() << "\n";
         }
 
-        for (std::size_t i = 3; i < character.size(); ++i) {
+        for (std::size_t i = 4; i < character.size(); ++i) {
             sf::FloatRect bodyPartBounds = character[i].getGlobalBounds();
             if (const std::optional intersection = boundingBox.findIntersection(bodyPartBounds)) {
                 playerAlive = false;
