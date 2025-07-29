@@ -3,6 +3,10 @@
 #include <iostream>
 #include <random>
 
+#ifdef _MSC_VER
+#pragma comment(linker, "/ENTRY:mainCRTStartup")
+#endif
+
 enum PlayerBody {
     head = 0
 };
