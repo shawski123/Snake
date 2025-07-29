@@ -24,6 +24,7 @@ sf::Sprite createPlayeSprite(sf::Texture& texture, const sf::Vector2f position);
 float getRandX(const sf::RenderWindow& window);
 float getRandY(const sf::RenderWindow& window);
 sf::FloatRect getMouthHitbox(const sf::Sprite& head, const sf::Vector2f& direction);
+void resetGame(std::vector<sf::Sprite>& character, Player& moveDirec, sf::Sprite& entity, sf::Vector2f& currentDirection, int& count, bool& playerAlive, const sf::Texture& texture, const sf::RenderWindow& window);
 
 int main()
 {
@@ -40,7 +41,7 @@ int main()
     std::vector<sf::Vector2f> positionHistory;
     Player moveDirec;
 
-    sf::RenderWindow window(sf::VideoMode({ 800, 600 }), "Snake Game", sf::Style::Default, sf::State::Windowed, settings);
+    sf::RenderWindow window(sf::VideoMode({ 800, 600 }), "Snake Game", sf::Style::Titlebar | sf::Style::Close, sf::State::Windowed, settings);
     window.setFramerateLimit(144);
     //-----------------------INITIALIZE-----------------------
 
@@ -107,7 +108,7 @@ int main()
             previousPositions.push_back(segment.getPosition());
         }
 
-        score.setString("Score: " + std::to_string(count));
+        score.setString("Score: " + std::to_string(count) + "\nClick enter to reset");
 
         sf::Vector2f movement(0.f, 0.f);
         characterMovement(movement, Player::speed, deltaTime, character, currentDirection, moveDirec);
@@ -161,6 +162,10 @@ int main()
                 std::cout << "Player dead!\n";
                 break;
             }
+        }
+
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Enter)) {
+            resetGame(character, moveDirec, entity, currentDirection, count, playerAlive, texture, window);
         }
 
         // Draw
@@ -253,4 +258,35 @@ sf::FloatRect getMouthHitbox(const sf::Sprite& head, const sf::Vector2f& directi
 
     sf::Vector2f topLeft = center + mouthOffset - sf::Vector2f(mouthWidth / 2.f, mouthHeight / 2.f);
     return sf::FloatRect(topLeft, { mouthWidth, mouthHeight });
+}
+
+void resetGame(std::vector<sf::Sprite>& character, Player& moveDirec, sf::Sprite& entity, sf::Vector2f& currentDirection, int& count, bool& playerAlive, const sf::Texture& texture, const sf::RenderWindow& window) {
+    character.clear();
+
+    // Reset player head
+    sf::Vector2f playerDefaultPosition(window.getSize().x / 2.f, window.getSize().y / 2.f);
+    sf::Sprite player = createPlayeSprite(const_cast<sf::Texture&>(texture), playerDefaultPosition);
+    player.setTextureRect(sf::IntRect({ 0,0 }, { 42,42 }));
+    player.setOrigin({ player.getLocalBounds().size.x / 2.f, player.getLocalBounds().size.y / 2.f });
+    character.push_back(player);
+
+    // Reset body segment (1 segment)
+    sf::Sprite newSegment(const_cast<sf::Texture&>(texture));
+    newSegment.setTextureRect(sf::IntRect({ 84,84 }, { 42,42 }));
+    newSegment.setOrigin({ newSegment.getLocalBounds().size.x / 2.f, newSegment.getLocalBounds().size.y });
+    newSegment.setPosition(character.back().getPosition()); // attach to head
+    character.push_back(newSegment);
+
+    // Reset apple position
+    entity.setPosition({ 200, window.getSize().y / 2.f });
+
+    // Reset movement
+    currentDirection = { 0.f, 0.f };
+    for (int i = 0; i < 4; i++) {
+        moveDirec.directions[i] = false;
+    }
+
+    // Reset score and player alive
+    count = 0;
+    playerAlive = true;
 }
