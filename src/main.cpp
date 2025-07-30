@@ -39,11 +39,11 @@ int main()
     bool playerAlive = true;
     sf::Clock clock;
     int count = 0;
-    bool appleEaten = false;
     sf::Vector2f randNums;
     std::vector<sf::Sprite> character;
     std::vector<sf::Vector2f> positionHistory;
     Player moveDirec;
+    std::vector<sf::RectangleShape> bounds;
 
     sf::RenderWindow window(sf::VideoMode({ 800, 600 }), "Snake Game", sf::Style::Titlebar | sf::Style::Close, sf::State::Windowed, settings);
     window.setFramerateLimit(144);
@@ -66,13 +66,24 @@ int main()
         return -1;
     }
 
+    sf::Texture mapTexture;
+    if (mapTexture.loadFromFile("resources/character/snake-map.png")) {
+        std::cout << "Texture loaded successfully!" << std::endl;
+    }
+    else {
+        return -1;
+    }
+    sf::Sprite map(mapTexture);
+    map.setOrigin({ map.getLocalBounds().size.x / 2, map.getLocalBounds().size.y / 2 });
+    map.setPosition({window.getSize().x / 2.f, window.getSize().y / 2.f});
+    map.setScale({ 1.f,1.f });
     //Font
     sf::Font font("resources/arial-font/arial.ttf");
     sf::Text score(font);
     score.Bold;
     score.setCharacterSize(24);
     score.setFillColor(sf::Color::White);
-
+    score.setPosition({25,25});
     //Apple
     sf::Sprite entity(appleTexture);
     entity.setPosition({ 200, window.getSize().y / 2.f });
@@ -174,11 +185,12 @@ int main()
 
         // Draw
         window.clear();
+        window.draw(map);
+        window.draw(entity);
         if (playerAlive == true) {
             for (const auto& part : character)
                 window.draw(part);
         }
-        window.draw(entity);
         window.draw(score);
         window.display();
     }
